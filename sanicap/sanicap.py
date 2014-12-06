@@ -1,3 +1,19 @@
+from random import randint
+from pcapfile import savefile
+import ipaddress, textwrap
+#Pseudocode
+
+
+#create empty mapping dictionaries
+
+
+class MACGenerator(object):
+    def __init__(self, start_mac='00:aa:00:00:00:00', sequential=True, mask=0):
+        self.start_mac = self._last_mac = start_mac
+        self.started = False
+        self.mappings = {}
+        self.sequential = sequential
+        self.mask = mask
     
     def _increment(self, address):
 
@@ -32,15 +48,23 @@
         
         return ':'.join(textwrap.wrap(returned_bin, 2))
 
+    def _random_mac(self, address):
+
+        def pad_bin(unpadded):
+            return format(int('0x' + unpadded.replace(':','').replace('.',''), 16), '048b')
+
+        unmasked = ''.join([str(randint(0,1)) for x in xrange(0, 48 - self.mask)])
+
+        full_bin = pad_bin(address)[:self.mask] + unmasked
+        
+        return ':'.join(textwrap.wrap(format(int(full_bin, 2), '012x'), 2))
+
     def _next_mac(self, address):
 
         if self.sequential:
-            #increment
             self._last_mac = self._increment(address)
-
         else:
-            # make sure mac isn't already in use
-            pass
+            self._last_mac = self._random_mac(address)
 
         if self._last_mac not in self.mappings.itervalues():
             return self._last_mac
@@ -68,9 +92,7 @@ class IPGenerator(object):
         version = 4 #ipaddress.ip_address(self._last_ip).version
         #pad binary number first so it's the correct length
         def pad_bin(unpadded):
-            pad_length = '0%sb' % 32
-
-            return format(int(ipaddress.ip_address(unicode(unpadded))), pad_length)
+            return format(int(ipaddress.ip_address(unicode(unpadded))), '032b')
 
         ip_bin = pad_bin(self._last_ip)
         
@@ -87,15 +109,27 @@ class IPGenerator(object):
         
         return str(ipaddress.IPv4Address(int(full_bin, 2)))
 
+    def _random_ip(self, address):
+
+        def pad_bin(unpadded):
+            return format(int(ipaddress.ip_address(unicode(unpadded))), '032b')
+
+        unmasked = ''.join([str(randint(0,1)) for x in xrange(0, 32 - self.mask)])
+
+        if self.started:
+            full_bin = pad_bin(address)[:self.mask] + unmasked
+        else:
+            self.started = True
+            full_bin = pad_bin(address)[:self.mask] + unmasked
+
+        return str(ipaddress.IPv4Address(int(full_bin, 2)))
+
     def _next_ip(self, address):
 
         if self.sequential:
-            #increment
             self._last_ip = self._increment(address)
-
         else:
-            # make sure IP isn't already in use
-            ip_list = [randint(1,254) for x in xrange(0,4)]
+            self._last_ip = self._random_ip(address)
 
         if self._last_ip not in self.mappings.itervalues():
             return self._last_ip
