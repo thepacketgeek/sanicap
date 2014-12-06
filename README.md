@@ -8,3 +8,8 @@ A python based packet capture sanitizer
     * MAC addresses
     * IP addresses
 * Integrates with scapy, pyshark, cloud-pcap
+
+## ToDo
+* Anonymize DNS Queries
+* Anonymize HTTP host info
+* Anonymize HTTP data? (not sure what yet, maybe just POST data)
