@@ -1,7 +1,7 @@
 import os, datetime
 from random import randint
 from scapy.utils import PcapWriter
-from scapy.all import sniff
+from scapy.all import Ether
 from pcapfile import savefile
 import ipaddress, textwrap
 
@@ -216,29 +216,36 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
     ip4_gen = IPv4Generator(sequential=sequential, mask=ipv4_mask, start_ip=start_ipv4)
     ip6_gen = IPv6Generator(sequential=sequential, mask=ipv6_mask, start_ip=start_ipv6)
 
-    pktwriter = PcapWriter(filepath_out, append=True)
+    with open('test.pcap') as capfile:
 
-    try:
-        def _clean_and_write(pkt):
+        #open cap file with pcapfile
+        cap = savefile.load_savefile(capfile, verbose=False)
 
-            #MAC addresses
-            pkt.src = mac_gen.get_mac(pkt.src)
-            pkt.dst = mac_gen.get_mac(pkt.dst)
+        #use scapy's pcapwriter
+        pktwriter = PcapWriter(filepath_out, append=True)
 
-            #IP Address
-            try:
-                pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
-                pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
-            except IndexError:
-                pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
-                pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
+        try:
+            for pkt in cap.packets:
+                
+                #create scapy packet from pcapfile packet raw output
+                pkt = Ether(pkt.raw())
 
-            pktwriter.write(pkt)
+                #MAC addresses
+                pkt.src = mac_gen.get_mac(pkt.src)
+                pkt.dst = mac_gen.get_mac(pkt.dst)
 
-        sniff(offline=filepath_in, prn=_clean_and_write)
-        
-    finally:
-        pktwriter.close()
+                #IP Address
+                try:
+                    pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
+                    pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
+                except IndexError:
+                    pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
+                    pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
+
+                pktwriter.write(pkt)
+
+        finally:
+            pktwriter.close()
 
     print 'This file has %s IPv4/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
     print 'File created: %s' % filepath_out
