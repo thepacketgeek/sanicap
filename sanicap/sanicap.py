@@ -218,27 +218,50 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
 
     pktwriter = PcapWriter(filepath_out, append=True)
 
-    def _clean_and_write(pkt):
+    try:
+        def _clean_and_write(pkt):
 
-        #MAC addresses
-        pkt.src = mac_gen.get_mac(pkt.src)
-        pkt.dst = mac_gen.get_mac(pkt.dst)
+            #MAC addresses
+            pkt.src = mac_gen.get_mac(pkt.src)
+            pkt.dst = mac_gen.get_mac(pkt.dst)
 
-        #IP Address
-        try:
-            pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
-            pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
-        except IndexError:
-            pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
-            pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
+            #IP Address
+            try:
+                pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
+                pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
+            except IndexError:
+                pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
+                pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
 
-        pktwriter.write(pkt)
+            pktwriter.write(pkt)
 
+        sniff(offline=filepath_in, prn=_clean_and_write)
+        
+    finally:
+        pktwriter.close()
 
-    sniff(offline=filepath_in, prn=_clean_and_write)
+    print 'This file has %s IPv4/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
+    print 'File created: %s' % filepath_out
 
-    pktwriter.close()
+#If run as a CLI util
+if __name__ == '__main__':
+    import sys, argparse
 
-    print 'This file has %s IP/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filepath_in", help="The pcap file to sanitize.")
+    parser.add_argument("-o", "--filepath_out", default=None, help="File path to store the sanitized pcap.")
+    parser.add_argument("-s", "--sequential", default=True, type=bool, help="Use sequential IPs/MACs in sanitization.")
+    parser.add_argument("--ipv4mask", default=0, type=int, help="Apply a mask to sanitized IPv4 addresses (Eg. mask of 8 preserves first octet).")
+    parser.add_argument("--ipv6mask", default=0, type=int, help="Apply a mask to sanitized IPv6 addresses (Eg. mask of 16 preserves first chazwazza).")
+    parser.add_argument("--macmask", default=0, type=int, help="Apply a mask to sanitized IPv6 addresses (Eg. mask of 24 preserves manufacturer).")
+    parser.add_argument("--startipv4", default='10.0.0.1', help="Start sequential IPv4 sanitization with this IPv4 addresses.")
+    parser.add_argument("--startipv6", default='2001:aa::1', help="Start sequential IPv6 sanitization with this IPv6 addresses.")
+    parser.add_argument("--startmac", default='00:aa:00:00:00:00', help="Start sequential MAC sanitization with this MAC addresses.")
+    
+    args = parser.parse_args()
 
-# if __name__ ==
+    try:
+        sanitize(args.filepath_in, args.filepath_out, args.sequential, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac)
+    except Exception as e:
+        print e.message
+        parser.print_help()
