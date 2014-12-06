@@ -1,14 +1,13 @@
+import os, datetime
 from random import randint
+from scapy.utils import PcapWriter
+from scapy.all import sniff
 from pcapfile import savefile
 import ipaddress, textwrap
-#Pseudocode
-
-
-#create empty mapping dictionaries
 
 
 class MACGenerator(object):
-    def __init__(self, start_mac='00:aa:00:00:00:00', sequential=True, mask=0):
+    def __init__(self, start_mac, sequential, mask):
         self.start_mac = self._last_mac = start_mac
         self.started = False
         self.mappings = {}
@@ -30,7 +29,6 @@ class MACGenerator(object):
         #only increment if it's not the first iteration
         if self.started:
             if self.mask > 0:
-                print 'mask'
                 masked = format(int(pad_bin(address)[:self.mask], 2), '0'+ str(self.mask) +'b')
                 unmasked = format(int(mac_bin[self.mask:], 2) + 1, '0'+ str(48 - self.mask) +'b')
                 returned_bin = format(int(masked + unmasked, 2) , '012x')
@@ -80,7 +78,7 @@ class MACGenerator(object):
             return self.mappings[address]
 
 class IPv4Generator(object):
-    def __init__(self, start_ip='10.0.0.1', sequential=True, mask=0):
+    def __init__(self, start_ip, sequential, mask):
         self.start_ip = self._last_ip = start_ip
         self.started = False
         self.mappings = {}
@@ -144,7 +142,7 @@ class IPv4Generator(object):
             return self.mappings[address]
 
 class IPv6Generator(object):
-    def __init__(self, start_ip='2001::1', sequential=True, mask=0):
+    def __init__(self, start_ip, sequential, mask):
         self.start_ip = self._last_ip = start_ip
         self.started = False
         self.mappings = {}
@@ -206,4 +204,41 @@ class IPv6Generator(object):
         except KeyError:
             self.mappings[address] = self._next_ip(address)
             return self.mappings[address]
-            
+
+
+def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:00'):
+
+    if not filepath_out:
+        timestamp = datetime.datetime.now().strftime('%y%m%d-%H%m%S')
+        filepath_out = os.path.splitext(filepath_in)[0] + '_sanitized_' + timestamp + os.path.splitext(filepath_in)[1]
+    
+    mac_gen = MACGenerator(sequential=sequential, mask=mac_mask, start_mac=start_mac)
+    ip4_gen = IPv4Generator(sequential=sequential, mask=ipv4_mask, start_ip=start_ipv4)
+    ip6_gen = IPv6Generator(sequential=sequential, mask=ipv6_mask, start_ip=start_ipv6)
+
+    pktwriter = PcapWriter(filepath_out, append=True)
+
+    def _clean_and_write(pkt):
+
+        #MAC addresses
+        pkt.src = mac_gen.get_mac(pkt.src)
+        pkt.dst = mac_gen.get_mac(pkt.dst)
+
+        #IP Address
+        try:
+            pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
+            pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
+        except IndexError:
+            pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
+            pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
+
+        pktwriter.write(pkt)
+
+
+    sniff(offline=filepath_in, prn=_clean_and_write)
+
+    pktwriter.close()
+
+    print 'This file has %s IP/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
+
+# if __name__ ==
