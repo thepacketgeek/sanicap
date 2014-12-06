@@ -14,9 +14,22 @@ A python based packet capture sanitizer
 
 ##Usage
 
+#### In another python script
     >>> from sanicap import sanitize
 	>>> sanicap.sanitize('/path/to/test.pcap', sequential=True, ipv4_mask=8, ipv6_mask=16)
-     This file has 23 IP/IPv6 endpoints and 6 MAC endpoints
+     This file has 23 IPv4/IPv6 endpoints and 6 MAC endpoints
+     File created: /path/to/test_sanitized_141205-124237.pcap
+
+#### As a CLI utility
+    $ python sanicap.py -h
+    usage: sanicap.py [-h] [-o FILEPATH_OUT] [-s SEQUENTIAL] [--ipv4mask IPV4MASK]
+                      [--ipv6mask IPV6MASK] [--macmask MACMASK]
+                      [--startipv4 STARTIPV4] [--startipv6 STARTIPV6]
+                      [--startmac STARTMAC]
+                      filepath_in
+    $ python sanicap.py test.pcap -s True --ipv4mask=8
+    This file has 23 IPv4/IPv6 endpoints and 6 MAC endpoints
+    File created: test_sanitized_141206-091251.pcap
 
 ##ToDo
 * Add pcapng support
