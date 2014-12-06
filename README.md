@@ -12,6 +12,8 @@ A python based packet capture sanitizer
 ##Installation
 `setup.py` file coming soon. For now, copy to directory of your project.
 
+Scapy can be a pain to install and get running due to dependencies not available via pip, but the best documentation for it is here: [Scapy Installation](http://www.secdev.org/projects/scapy/doc/installation.html)
+
 ##Usage
 
 #### In another python script
