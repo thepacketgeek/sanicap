@@ -10,7 +10,7 @@ class MACGenerator(object):
     def __init__(self, start_mac, sequential, mask):
         self.start_mac = self._last_mac = start_mac
         self.started = False
-        self.mappings = {}
+        self.mappings = {'ff:ff:ff:ff:ff:ff': 'ff:ff:ff:ff:ff:ff'}
         self.sequential = sequential
         self.mask = mask
     
@@ -81,7 +81,7 @@ class IPv4Generator(object):
     def __init__(self, start_ip, sequential, mask):
         self.start_ip = self._last_ip = start_ip
         self.started = False
-        self.mappings = {}
+        self.mappings = {'255.255.255.255': '255.255.255.255'}
         self.sequential = sequential
         self.mask = mask
     
