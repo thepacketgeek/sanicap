@@ -216,7 +216,7 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
     ip4_gen = IPv4Generator(sequential=sequential, mask=ipv4_mask, start_ip=start_ipv4)
     ip6_gen = IPv6Generator(sequential=sequential, mask=ipv6_mask, start_ip=start_ipv6)
 
-    with open('test.pcap') as capfile:
+    with open(filepath_in) as capfile:
 
         #open cap file with pcapfile
         cap = savefile.load_savefile(capfile, verbose=False)
