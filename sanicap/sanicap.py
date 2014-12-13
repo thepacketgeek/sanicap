@@ -234,14 +234,17 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
                 pkt.src = mac_gen.get_mac(pkt.src)
                 pkt.dst = mac_gen.get_mac(pkt.dst)
 
-                #IP Address
+                #IP Addresses
                 try:
                     pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
                     pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
                 except IndexError:
+                    pass
+                try:
                     pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
                     pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
-
+                except IndexError:
+                    pass
                 pktwriter.write(pkt)
 
         finally:
