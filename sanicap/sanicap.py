@@ -232,7 +232,10 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
 
                 #MAC addresses
                 pkt.src = mac_gen.get_mac(pkt.src)
-                pkt.dst = mac_gen.get_mac(pkt.dst)
+                
+                if pkt.dst != 'ff:ff:ff:ff:ff:ff':
+                    pkt.dst = mac_gen.get_mac(pkt.dst)
+
 
                 #IP Addresses
                 try:
