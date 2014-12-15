@@ -248,6 +248,15 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
                     pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
                 except IndexError:
                     pass
+
+                #sanitize ARP addresses
+                try:
+                    pkt['ARP'].hwsrc = mac_gen.get_mac(pkt['ARP'].hwsrc)
+                    pkt['ARP'].hwdst = mac_gen.get_mac(pkt['ARP'].hwdst)
+                    pkt['ARP'].psrc = ip4_gen.get_ip(pkt['ARP'].psrc)
+                    pkt['ARP'].pdst = ip4_gen.get_ip(pkt['ARP'].pdst)
+                except IndexError:
+                    pass
                 pktwriter.write(pkt)
 
         finally:
