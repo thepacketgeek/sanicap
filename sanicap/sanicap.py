@@ -206,7 +206,7 @@ class IPv6Generator(object):
             return self.mappings[address]
 
 
-def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:00'):
+def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01'):
 
     if not filepath_out:
         timestamp = datetime.datetime.now().strftime('%y%m%d-%H%m%S')
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     parser.add_argument("--macmask", default=0, type=int, help="Apply a mask to sanitized IPv6 addresses (Eg. mask of 24 preserves manufacturer).")
     parser.add_argument("--startipv4", default='10.0.0.1', help="Start sequential IPv4 sanitization with this IPv4 addresses.")
     parser.add_argument("--startipv6", default='2001:aa::1', help="Start sequential IPv6 sanitization with this IPv6 addresses.")
-    parser.add_argument("--startmac", default='00:aa:00:00:00:00', help="Start sequential MAC sanitization with this MAC addresses.")
+    parser.add_argument("--startmac", default='00:aa:00:00:00:01', help="Start sequential MAC sanitization with this MAC addresses.")
     
     args = parser.parse_args()
 
