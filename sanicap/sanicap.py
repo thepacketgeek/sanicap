@@ -206,7 +206,7 @@ class IPv6Generator(object):
             return self.mappings[address]
 
 
-def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01'):
+def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', info=True):
 
     if not filepath_out:
         timestamp = datetime.datetime.now().strftime('%y%m%d-%H%m%S')
@@ -262,8 +262,9 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
         finally:
             pktwriter.close()
 
-    print 'This file has %s IPv4/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
-    print 'File created: %s' % filepath_out
+    if info:
+        print 'This file has %s IPv4/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
+        print 'File created: %s' % filepath_out
 
 #If run as a CLI util
 if __name__ == '__main__':
