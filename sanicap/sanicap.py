@@ -10,7 +10,7 @@ class MACGenerator(object):
     def __init__(self, start_mac, sequential, mask):
         self.start_mac = self._last_mac = start_mac
         self.started = False
-        self.mappings = {'ff:ff:ff:ff:ff:ff': 'ff:ff:ff:ff:ff:ff'}
+        self.mappings = {}
         self.sequential = sequential
         self.mask = mask
     
@@ -71,17 +71,21 @@ class MACGenerator(object):
 
     def get_mac(self, address):
         # check address mapping
-        try:
-            return self.mappings[address]
-        except KeyError:
-            self.mappings[address] = self._next_mac(address)
-            return self.mappings[address]
+        generic_addresses = ['ff:ff:ff:ff:ff:ff', '00:00:00:00:00:00']
+        if address not in generic_addresses:
+            try:
+                return self.mappings[address]
+            except KeyError:
+                self.mappings[address] = self._next_mac(address)
+                return self.mappings[address]
+        else:
+            return address
 
 class IPv4Generator(object):
     def __init__(self, start_ip, sequential, mask):
         self.start_ip = self._last_ip = start_ip
         self.started = False
-        self.mappings = {'255.255.255.255': '255.255.255.255'}
+        self.mappings = {}
         self.sequential = sequential
         self.mask = mask
     
@@ -135,11 +139,15 @@ class IPv4Generator(object):
 
     def get_ip(self, address):
         # check address mapping
-        try:
-            return self.mappings[address]
-        except KeyError:
-            self.mappings[address] = self._next_ip(address)
-            return self.mappings[address]
+        generic_addresses = ['255.255.255.255', '0.0.0.0']
+        if address not in generic_addresses:
+            try:
+                return self.mappings[address]
+            except KeyError:
+                self.mappings[address] = self._next_ip(address)
+                return self.mappings[address]
+        else:
+            return address
 
 class IPv6Generator(object):
     def __init__(self, start_ip, sequential, mask):
@@ -199,11 +207,14 @@ class IPv6Generator(object):
 
     def get_ip(self, address):
         # check address mapping
-        try:
-            return self.mappings[address]
-        except KeyError:
-            self.mappings[address] = self._next_ip(address)
-            return self.mappings[address]
+        if not address.startswith("ff02"):
+            try:
+                return self.mappings[address]
+            except KeyError:
+                self.mappings[address] = self._next_ip(address)
+                return self.mappings[address]
+        else:
+            return address
 
 
 def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', info=True):
