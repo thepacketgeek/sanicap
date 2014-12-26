@@ -227,54 +227,48 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
     ip4_gen = IPv4Generator(sequential=sequential, mask=ipv4_mask, start_ip=start_ipv4)
     ip6_gen = IPv6Generator(sequential=sequential, mask=ipv6_mask, start_ip=start_ipv6)
 
-    #use scapy's pcapwriter
-    pktwriter = PcapWriter(filepath_out, append=True)
-
-    def clean_packet(pkt):
-        
-        #MAC addresses
-        pkt.src = mac_gen.get_mac(pkt.src)
-        
-        if pkt.dst != 'ff:ff:ff:ff:ff:ff':
-            pkt.dst = mac_gen.get_mac(pkt.dst)
-
-
-        #IP Addresses
-        try:
-            pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
-            pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
-            del pkt['IP'].chksum
-        except IndexError:
-            pass
-        try:
-            pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
-            pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
-            del pkt['IPv6'].chksum
-        except IndexError:
-            pass
-
-        #sanitize ARP addresses
-        try:
-            pkt['ARP'].hwsrc = mac_gen.get_mac(pkt['ARP'].hwsrc)
-            pkt['ARP'].hwdst = mac_gen.get_mac(pkt['ARP'].hwdst)
-            pkt['ARP'].psrc = ip4_gen.get_ip(pkt['ARP'].psrc)
-            pkt['ARP'].pdst = ip4_gen.get_ip(pkt['ARP'].pdst)
-        except IndexError:
-            pass
-
-
-
-        try:
-    
     with open(filepath_in) as capfile:
-        
+
+        #open cap file with pcapfile
+        cap = savefile.load_savefile(capfile, verbose=False)
+
+        #use scapy's pcapwriter
+        pktwriter = PcapWriter(filepath_out, append=True)
+
         try:
-            cap = savefile.load_savefile(capfile, verbose=False)
             for pkt in cap.packets:
+                
                 #create scapy packet from pcapfile packet raw output
                 pkt = Ether(pkt.raw())
 
-            pktwriter.write(clean_packet(pkt))
+                #MAC addresses
+                pkt.src = mac_gen.get_mac(pkt.src)
+                
+                if pkt.dst != 'ff:ff:ff:ff:ff:ff':
+                    pkt.dst = mac_gen.get_mac(pkt.dst)
+
+
+                #IP Addresses
+                try:
+                    pkt['IP'].src = ip4_gen.get_ip(pkt['IP'].src)
+                    pkt['IP'].dst = ip4_gen.get_ip(pkt['IP'].dst)
+                except IndexError:
+                    pass
+                try:
+                    pkt['IPv6'].src = ip6_gen.get_ip(pkt['IPv6'].src)
+                    pkt['IPv6'].dst = ip6_gen.get_ip(pkt['IPv6'].dst)
+                except IndexError:
+                    pass
+
+                #sanitize ARP addresses
+                try:
+                    pkt['ARP'].hwsrc = mac_gen.get_mac(pkt['ARP'].hwsrc)
+                    pkt['ARP'].hwdst = mac_gen.get_mac(pkt['ARP'].hwdst)
+                    pkt['ARP'].psrc = ip4_gen.get_ip(pkt['ARP'].psrc)
+                    pkt['ARP'].pdst = ip4_gen.get_ip(pkt['ARP'].pdst)
+                except IndexError:
+                    pass
+                pktwriter.write(pkt)
 
         finally:
             pktwriter.close()
