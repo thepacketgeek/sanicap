@@ -253,8 +253,6 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
         except IndexError:
             pass
 
-        #open cap file with pcapfile
-        cap = savefile.load_savefile(capfile, verbose=False)
         #sanitize ARP addresses
         try:
             pkt['ARP'].hwsrc = mac_gen.get_mac(pkt['ARP'].hwsrc)
