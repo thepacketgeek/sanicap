@@ -269,6 +269,13 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
                 except IndexError:
                     pass
 
+                #fix checksum in each layer, starting at the top layer
+                for layer in range(12, 0, -1):
+                    try:
+                        del new_pkt[layer].chksum
+                    except:
+                        pass
+
                 pktwriter.write(new_pkt)
 
         finally:
