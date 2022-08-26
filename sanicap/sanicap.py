@@ -51,7 +51,7 @@ class MACGenerator(object):
         def pad_bin(unpadded):
             return format(int('0x' + unpadded.replace(':','').replace('.',''), 16), '048b')
 
-        unmasked = ''.join([str(randint(0,1)) for x in xrange(0, 48 - self.mask)])
+        unmasked = ''.join([str(randint(0,1)) for x in range(0, 48 - self.mask)])
 
         full_bin = pad_bin(address)[:self.mask] + unmasked
         
@@ -64,7 +64,7 @@ class MACGenerator(object):
         else:
             self._last_mac = self._random_mac(address)
 
-        if self._last_mac not in self.mappings.itervalues():
+        if self._last_mac not in iter(self.mappings.values()):
             return self._last_mac
         else:
             return self._next_mac(address)
@@ -93,7 +93,7 @@ class IPv4Generator(object):
 
         #pad binary number first so it's the correct length
         def pad_bin(unpadded):
-            return format(int(ipaddress.IPv4Address(unicode(unpadded))), '032b')
+            return format(int(ipaddress.IPv4Address(str(unpadded))), '032b')
 
         ip_bin = pad_bin(self._last_ip)
         
@@ -113,9 +113,9 @@ class IPv4Generator(object):
     def _random_ip(self, address):
 
         def pad_bin(unpadded):
-            return format(int(ipaddress.IPv4Address(unicode(unpadded))), '032b')
+            return format(int(ipaddress.IPv4Address(str(unpadded))), '032b')
 
-        unmasked = ''.join([str(randint(0,1)) for x in xrange(0, 32 - self.mask)])
+        unmasked = ''.join([str(randint(0,1)) for x in range(0, 32 - self.mask)])
 
         if self.started:
             full_bin = pad_bin(address)[:self.mask] + unmasked
@@ -132,7 +132,7 @@ class IPv4Generator(object):
         else:
             self._last_ip = self._random_ip(address)
 
-        if self._last_ip not in self.mappings.itervalues():
+        if self._last_ip not in iter(self.mappings.values()):
             return self._last_ip
         else:
             return self._next_ip(address)
@@ -161,7 +161,7 @@ class IPv6Generator(object):
 
         #pad binary number first so it's the correct length
         def pad_bin(unpadded):
-            return format(int(ipaddress.IPv6Address(unicode(unpadded))), '0128b')
+            return format(int(ipaddress.IPv6Address(str(unpadded))), '0128b')
 
         ip_bin = pad_bin(self._last_ip)
         
@@ -181,9 +181,9 @@ class IPv6Generator(object):
     def _random_ip(self, address):
 
         def pad_bin(unpadded):
-            return format(int(ipaddress.IPv6Address(unicode(unpadded))), '0128b')
+            return format(int(ipaddress.IPv6Address(str(unpadded))), '0128b')
 
-        unmasked = ''.join([str(randint(0,1)) for x in xrange(0, 128 - self.mask)])
+        unmasked = ''.join([str(randint(0,1)) for x in range(0, 128 - self.mask)])
 
         if self.started:
             full_bin = pad_bin(address)[:self.mask] + unmasked
@@ -200,7 +200,7 @@ class IPv6Generator(object):
         else:
             self._last_ip = self._random_ip(address)
 
-        if self._last_ip not in self.mappings.itervalues():
+        if self._last_ip not in iter(self.mappings.values()):
             return self._last_ip
         else:
             return self._next_ip(address)
@@ -282,8 +282,8 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
             pktwriter.close()
 
     if info:
-        print 'This file has %s IPv4/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings))
-        print 'File created: %s' % filepath_out
+        print('This file has %s IPv4/IPv6 endpoints and %s MAC endpoints' % (len(ip4_gen.mappings) + len(ip6_gen.mappings), len(mac_gen.mappings)))
+        print('File created: %s' % filepath_out)
 
 #If run as a CLI util
 if __name__ == '__main__':
@@ -305,5 +305,5 @@ if __name__ == '__main__':
     try:
         sanitize(args.filepath_in, args.filepath_out, args.sequential, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac)
     except Exception as e:
-        print e.message
+        print(e.message)
         parser.print_help()
