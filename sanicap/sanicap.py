@@ -217,7 +217,7 @@ class IPv6Generator(object):
             return address
 
 
-def sanitize(filepath_in, filepath_out = None, sequential=True, append=False, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', info=True):
+def sanitize(filepath_in, filepath_out = None, sequential=True, append=False, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', fixed_vlan=None, info=True):
 
     if not filepath_out:
         timestamp = datetime.datetime.now().strftime('%y%m%d-%H%m%S')
@@ -247,6 +247,13 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, append=False, ip
                     new_pkt.dst = mac_gen.get_mac(new_pkt.dst)
                 except:
                     pass
+
+                #VLAN number
+                if fixed_vlan: # not None
+                    try:
+                        new_pkt['Dot1Q'].vlan = fixed_vlan
+                    except:
+                        pass
 
                 #IP Addresses
                 try:
@@ -300,11 +307,12 @@ if __name__ == '__main__':
     parser.add_argument("--startipv4", default='10.0.0.1', help="Start sequential IPv4 sanitization with this IPv4 addresses.")
     parser.add_argument("--startipv6", default='2001:aa::1', help="Start sequential IPv6 sanitization with this IPv6 addresses.")
     parser.add_argument("--startmac", default='00:aa:00:00:00:01', help="Start sequential MAC sanitization with this MAC addresses.")
+    parser.add_argument("--fixedvlan", default=None, type=int, help="Overwrite VLANID (fixed)")
     
     args = parser.parse_args()
 
     try:
-        sanitize(args.filepath_in, args.filepath_out, args.sequential, args.append, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac)
+        sanitize(args.filepath_in, args.filepath_out, args.sequential, args.append, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac, args.fixedvlan)
     except Exception as e:
         print(e.message)
         parser.print_help()
