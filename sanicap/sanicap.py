@@ -217,7 +217,7 @@ class IPv6Generator(object):
             return address
 
 
-def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', info=True):
+def sanitize(filepath_in, filepath_out = None, sequential=True, append=False, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', info=True):
 
     if not filepath_out:
         timestamp = datetime.datetime.now().strftime('%y%m%d-%H%m%S')
@@ -233,7 +233,7 @@ def sanitize(filepath_in, filepath_out = None, sequential=True, ipv4_mask=0, ipv
         cap = savefile.load_savefile(capfile, verbose=False)
 
         #use scapy's pcapwriter
-        pktwriter = PcapWriter(filepath_out, append=True)
+        pktwriter = PcapWriter(filepath_out, append=append)
 
         try:
             for pkt in cap.packets:
@@ -293,6 +293,7 @@ if __name__ == '__main__':
     parser.add_argument("filepath_in", help="The pcap file to sanitize.")
     parser.add_argument("-o", "--filepath_out", default=None, help="File path to store the sanitized pcap.")
     parser.add_argument("-s", "--sequential", default=True, type=bool, help="Use sequential IPs/MACs in sanitization.")
+    parser.add_argument("-a", "--append", default=False, type=bool, help="Append to, instead of overwriting output file..")
     parser.add_argument("--ipv4mask", default=0, type=int, help="Apply a mask to sanitized IPv4 addresses (Eg. mask of 8 preserves first octet).")
     parser.add_argument("--ipv6mask", default=0, type=int, help="Apply a mask to sanitized IPv6 addresses (Eg. mask of 16 preserves first chazwazza).")
     parser.add_argument("--macmask", default=0, type=int, help="Apply a mask to sanitized IPv6 addresses (Eg. mask of 24 preserves manufacturer).")
@@ -303,7 +304,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     try:
-        sanitize(args.filepath_in, args.filepath_out, args.sequential, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac)
+        sanitize(args.filepath_in, args.filepath_out, args.sequential, args.append, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac)
     except Exception as e:
         print(e.message)
         parser.print_help()
