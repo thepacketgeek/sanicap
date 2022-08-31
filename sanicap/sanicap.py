@@ -219,7 +219,7 @@ class IPv6Generator(object):
             return address
 
 
-def sanitize(filepath_in, filepath_out = None, sequential=True, append=False, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', fixed_vlan=None, info=True):
+def sanitize(filepath_in, *, filepath_out = None, sequential=True, append=False, ipv4_mask=0, ipv6_mask=0, mac_mask=0, start_ipv4='10.0.0.1', start_ipv6='2001:aa::1', start_mac='00:aa:00:00:00:01', fixed_vlan=None, info=True):
 
     if not filepath_out:
         timestamp = datetime.datetime.now().strftime('%y%m%d-%H%m%S')
@@ -314,7 +314,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     try:
-        sanitize(args.filepath_in, args.filepath_out, args.sequential, args.append, args.ipv4mask, args.ipv6mask, args.macmask, args.startipv4, args.startipv6, args.startmac, args.fixedvlan)
+        sanitize(args.filepath_in, filepath_out=args.filepath_out, sequential=args.sequential, append=args.append,
+                 ipv4_mask=args.ipv4mask, ipv6_mask=args.ipv6mask, mac_mask=args.macmask, start_ipv4=args.startipv4,
+                 start_ipv6=args.startipv6, start_mac=args.startmac, fixed_vlan=args.fixedvlan)
     except Exception as e:
         print(e.message)
         parser.print_help()
