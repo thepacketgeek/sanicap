@@ -53,7 +53,7 @@ class MACGenerator(object):
         def pad_bin(unpadded):
             return format(int('0x' + unpadded.replace(':','').replace('.',''), 16), '048b')
 
-        unmasked = ''.join([str(randint(0,1)) for x in range(0, 48 - self.mask)])
+        unmasked = ''.join(str(randint(0,1)) for x in range(0, 48 - self.mask))
 
         full_bin = pad_bin(address)[:self.mask] + unmasked
         
@@ -117,7 +117,7 @@ class IPv4Generator(object):
         def pad_bin(unpadded):
             return format(int(ipaddress.IPv4Address(str(unpadded))), '032b')
 
-        unmasked = ''.join([str(randint(0,1)) for x in range(0, 32 - self.mask)])
+        unmasked = ''.join(str(randint(0,1)) for x in range(0, 32 - self.mask))
 
         if self.started:
             full_bin = pad_bin(address)[:self.mask] + unmasked
@@ -185,7 +185,7 @@ class IPv6Generator(object):
         def pad_bin(unpadded):
             return format(int(ipaddress.IPv6Address(str(unpadded))), '0128b')
 
-        unmasked = ''.join([str(randint(0,1)) for x in range(0, 128 - self.mask)])
+        unmasked = ''.join(str(randint(0,1)) for x in range(0, 128 - self.mask))
 
         if self.started:
             full_bin = pad_bin(address)[:self.mask] + unmasked
