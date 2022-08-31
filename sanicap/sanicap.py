@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os, datetime
 from random import randint
 from scapy.utils import PcapWriter
