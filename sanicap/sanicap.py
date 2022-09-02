@@ -318,5 +318,10 @@ if __name__ == '__main__':
                  ipv4_mask=args.ipv4mask, ipv6_mask=args.ipv6mask, mac_mask=args.macmask, start_ipv4=args.startipv4,
                  start_ipv6=args.startipv6, start_mac=args.startmac, fixed_vlan=args.fixedvlan)
     except Exception as e:
-        print(e.message)
+        if str(e) == "No supported Magic Number found":
+            print("Error: pcapng is not supported, convert the input to classic pcap (try editcap -F pcap).\n")
+        else:
+            print(f"Error: {e}\n")
+
         parser.print_help()
+        sys.exit(1)
