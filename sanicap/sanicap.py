@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
-import os, datetime
+import datetime
+import ipaddress
+import os
+import textwrap
 from random import randint
-from scapy.utils import PcapWriter
-from scapy.all import Ether
+
 from pcapfile import savefile
-import ipaddress, textwrap
+from scapy.all import Ether
+from scapy.utils import PcapWriter
 
 
 class MACGenerator(object):
